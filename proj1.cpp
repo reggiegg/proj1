@@ -5,6 +5,7 @@
 #include <cctype>
 #include <vector>
 #include "proj1.h"
+#include <sstream>
 
 using namespace std;
 
@@ -15,18 +16,78 @@ vector<word*> words;
 
 void parseBook(ifstream& in)
 {	
-	word *a = new word();
-	a->name = "banana";
-	words.push_back(a);
+	string s;
+	// for every word in the input stream:
+	while(getline(in, s)){
+		lowercaseWords(s);
+		string word;
+		istringstream iss(s, istringstream::in);
+		while(iss >> word){
+			updateIndex(word);
+		}
+	}
 
-	cout << words[0]->name << endl;
+
+	// add if the word if it isn't, in the correct position
+	// if it is, increment the count of the word, and add the page
+
+
+
+
+	// word *a = new word();
+	// a->name = "banana";
+	// a->count = 666;
+	// a->pages = new vector<int>;
+	// (*(a->pages)).push_back(6);
+	// (*(a->pages)).push_back(6);
+	// (*(a->pages)).push_back(6);
+	// words.push_back(a);
+
+	// a = new word();
+	// a->name = "banana";
+	// a->count = 666;
+	// a->pages = new vector<int>;
+	// (*(a->pages)).push_back(6);
+	// (*(a->pages)).push_back(6);
+	// (*(a->pages)).push_back(6);
+	// words.push_back(a);
+
+
+	// cout << words[0]->name << endl;
 }
 
+void updateIndex(string word)
+{
+	// check to see if the word is in the index
+	// add if the word if it isn't, in the correct position
+	// if it is, increment the count of the word, and add the page
+}
+
+
+// prints the pages vector
+void printPages(vector<int> pages)
+{
+	for (vector<int>::iterator it = pages.begin(); it != pages.end(); ++it)
+	{
+		cout << *it << " ";
+	}
+}
+
+// prints index of words, counts and pages
 void printIndex(ofstream& out)
 {
 	
-	//code goes here.
+	//iterate through words
+	for (vector<word*>::iterator it = words.begin() ; it != words.end(); ++it)
+	{	
+		word* w = *it;
+		cout << w->name << " (" << w->count << ") ";
+		printPages(*(w->pages));
+		cout << endl;  
+	}
+	//for each word, print word, number of occurances, and list of pages. endl.
 }
+
 
 // Remove all characters except letters (A-Z,a-z) from line,
 // except keep '-' or '\'' if they are between letters.
@@ -59,11 +120,6 @@ int main(int argc, char const *argv[])
 	ifstream in(argv[1]);
 	ofstream out(argv[2]); //TODO: make more robust (potential error handling)
 	string s;
-
-	while(getline(in, s)){
-		cout << s << "\n";
-		// out << s << "\n";
-	}
 
 	parseBook(in);
 	printIndex(out);

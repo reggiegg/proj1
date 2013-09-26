@@ -120,7 +120,7 @@ int main(int argc, char const *argv[])
 	}
 
 	ifstream in(argv[1]);
-	ofstream out(argv[2]); //TODO: make more robust (potential error handling)
+	ofstream out(argv[2]); 
 	string s;
 
 	parseBook(in);

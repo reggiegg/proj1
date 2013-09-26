@@ -13,11 +13,10 @@ using namespace std;
 vector<word*> words;
 
 
-
+// parses each word in the given input stream, and adds it to the index structure
 void parseBook(ifstream& in)
 {	
 
-	
 	int counter = 0;
 
 	string s;
@@ -28,51 +27,27 @@ void parseBook(ifstream& in)
 		string word;
 		istringstream iss(s, istringstream::in);
 		while(iss >> word){
-			updateIndex(word, counter%40+1, 0, words.size()-1);
+			updateIndex(word, (counter/40)+1, 0, words.size()-1);
 		}
 		counter++;
 	}
-
-
-	// add if the word if it isn't, in the correct position
-	// if it is, increment the count of the word, and add the page
-
-
-
-
-	// word *a = new word();
-	// a->name = "banana";
-	// a->count = 666;
-	// a->pages = new vector<int>;
-	// (*(a->pages)).push_back(6);
-	// (*(a->pages)).push_back(6);
-	// (*(a->pages)).push_back(6);
-	// words.push_back(a);
-
-	// a = new word();
-	// a->name = "banana";
-	// a->count = 666;
-	// a->pages = new vector<int>;
-	// (*(a->pages)).push_back(6);
-	// (*(a->pages)).push_back(6);
-	// (*(a->pages)).push_back(6);
-	// words.push_back(a);
-
-
-	// cout << words[0]->name << endl;
 }
 
+
+// find location of word alphabetically, if it exists: increase the count and add the page number.
+// if it doesn't: insert it into the index.
 void updateIndex(string wd, int page, int begin, int end)
 {
-	if (begin >= end) { 
+	// using binary search
+	if (begin > end) { 
+		// create and insert new word into array
 		word *w = new word();
 		w->name = wd;
 		w->count = 1;
 		w->pages = new vector<int>;
 		(w->pages)->push_back(page);
-		vector<word*>::iterator nth = words.begin() + end; //here is the segmentation fault
+		vector<word*>::iterator nth = words.begin() + end +1 ;//here is the segmentation fault
 		words.insert(nth, w);
-		cout << "made it here" << endl;
 	} else {
 		int middle = (begin + end )/2;
 		int compValue = wd.compare(words[middle]->name);
@@ -81,38 +56,22 @@ void updateIndex(string wd, int page, int begin, int end)
 		} else if (compValue > 0) {
 			updateIndex(wd, page, middle+1, end);
 		} else {
+			// updates the given word's information
 			word* w = words[middle];
 			(w->count)++;
 			(w->pages)->push_back(page);
 		}
 	} 								 
 
-	// for (vector<>::iterator it = words.begin(); it != words.end(); ++it)
-	// {
-	// 	word w = *it;
-	// 	if (w == word) {
-	// 			// 		break;
-	// 	} else {
-
-	// 	}
-
-	// 	// if it matches word, then increment counter and update the pages, and exit;
-
-
-	// 	// if ()	
-	// }
-	// check to see if the word is in the index
-	// add if the word if it isn't, in the correct position
-	// if it is, increment the count of the word, and add the page
 }
 
 
 // prints the pages vector
-void printPages(vector<int> pages)
+void printPages(vector<int> pages, ofstream& out)
 {
 	for (vector<int>::iterator it = pages.begin(); it != pages.end(); ++it)
 	{
-		cout << *it << " ";
+		out << *it << " ";
 	}
 }
 
@@ -121,14 +80,14 @@ void printIndex(ofstream& out)
 {
 	
 	//iterate through words
+	//for each word, print word, number of occurances, and list of pages. endl.
 	for (vector<word*>::iterator it = words.begin() ; it != words.end(); ++it)
 	{	
 		word* w = *it;
-		cout << w->name << " (" << w->count << ") ";
-		printPages(*(w->pages));
-		cout << endl;  
+		out << w->name << " (" << w->count << ") ";
+		printPages(*(w->pages), out);
+		out << endl;  
 	}
-	//for each word, print word, number of occurances, and list of pages. endl.
 }
 
 
@@ -157,7 +116,7 @@ int main(int argc, char const *argv[])
 	if (argc != 3)
 	{
 		cerr << "Usage: " << argv[0] << " infile.txt outfile.txt" << endl;
-		// return 1;
+		return 1;
 	}
 
 	ifstream in(argv[1]);

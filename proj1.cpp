@@ -10,21 +10,27 @@
 using namespace std;
 
 // Go line by line, extracting each word, adding them to the index structure
-
 vector<word*> words;
+
 
 
 void parseBook(ifstream& in)
 {	
+
+	
+	int counter = 0;
+
 	string s;
+
 	// for every word in the input stream:
 	while(getline(in, s)){
 		lowercaseWords(s);
 		string word;
 		istringstream iss(s, istringstream::in);
 		while(iss >> word){
-			updateIndex(word);
+			updateIndex(word, counter%40+1, 0, words.size()-1);
 		}
+		counter++;
 	}
 
 
@@ -56,8 +62,45 @@ void parseBook(ifstream& in)
 	// cout << words[0]->name << endl;
 }
 
-void updateIndex(string word)
+void updateIndex(string wd, int page, int begin, int end)
 {
+	if (begin >= end) { 
+		word *w = new word();
+		w->name = wd;
+		w->count = 1;
+		w->pages = new vector<int>;
+		(w->pages)->push_back(page);
+		vector<word*>::iterator nth = words.begin() + end; //here is the segmentation fault
+		words.insert(nth, w);
+		cout << "made it here" << endl;
+	} else {
+		int middle = (begin + end )/2;
+		int compValue = wd.compare(words[middle]->name);
+		if (compValue < 0) {
+			updateIndex(wd, page, begin, middle-1);
+		} else if (compValue > 0) {
+			updateIndex(wd, page, middle+1, end);
+		} else {
+			word* w = words[middle];
+			(w->count)++;
+			(w->pages)->push_back(page);
+		}
+	} 								 
+
+	// for (vector<>::iterator it = words.begin(); it != words.end(); ++it)
+	// {
+	// 	word w = *it;
+	// 	if (w == word) {
+	// 			// 		break;
+	// 	} else {
+
+	// 	}
+
+	// 	// if it matches word, then increment counter and update the pages, and exit;
+
+
+	// 	// if ()	
+	// }
 	// check to see if the word is in the index
 	// add if the word if it isn't, in the correct position
 	// if it is, increment the count of the word, and add the page

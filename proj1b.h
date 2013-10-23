@@ -27,10 +27,19 @@ typedef struct node{
 
 
 void parseBook(std::ifstream& in);
+node* find(std::string wd, node* skiplist, int index);
+node* make_node(std::string wd, int page);
+void update_pointers(node* n);
 void pushPages(word *w, int num);
 void updateIndex(std::string word, int page);
+void update_word(word* w, int page);
+int randBit(void);
+void init_head();
+void make_height(node* n);
 void printPages(std::vector<int> pages, std::ofstream& out);
 void printIndex(std::ofstream& out);
+void printWord(word* w, std::ofstream& out);
+void printNodes(node* n, std::ofstream& out);
 void lowercaseWords(std::string& line);
 
 

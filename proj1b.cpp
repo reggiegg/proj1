@@ -19,9 +19,7 @@ node* path[MAX_HEIGHT];
 // parses each word in the given input stream, and adds it to the index structure
 void parseBook(ifstream& in)
 {	
-
 	int counter = 0;
-
 	string s;
 
 	// for every word in the input stream:
@@ -35,18 +33,6 @@ void parseBook(ifstream& in)
 		counter++;
 	}
 }
-
-
-// Adds given page number to back of page vector only if it isn't already there
-// Assumes: increasing order for page nums.
-void pushPages(word *w, int num)
-{
-	vector<int> *pages = w->pages;
-	if (pages->back() != num) {
-		pages->push_back(num);
-	}
-}
-
 
 // Return the node for the word of the given string in the given skip list, or NULL if it doesn't exit.
 node* find(string wd, node* skiplist, int index)
@@ -69,37 +55,6 @@ node* find(string wd, node* skiplist, int index)
 	return find(wd, skiplist, index-1);	
 }
 
-// Adds the given page number to the given word
-void update_word(word* w, int page)
-{
-	(w->count)++;
-	pushPages(w, page);
-}
-
-// creates a random number with proper distribution from 1 to MAX_HEIGHT
-int randBit(void) 
-{ 
-	static int bitsUpperBd=0;
-	static int bits; // store bits returned by rand()
-	if( bitsUpperBd == 0 ) { // refresh store when empty
-		bitsUpperBd = RAND_MAX;
-		bits = rand();
-	}
-	int b = bits & 1;
-	bits >>= 1;
-	bitsUpperBd >>= 1;
-	return b;
-}
-
-// Assigns a random height for a given node.
-void make_height(node* n)
-{
-	int i;
-	for( i=1; i<MAX_HEIGHT; ++i ) {
-		if( randBit() == 1 ) break;
-	}
-	n->height = i;
-}
 
 // creates a new word and adds it to a new node, and returns that node
 node* make_node(string wd, int page)
@@ -119,14 +74,29 @@ node* make_node(string wd, int page)
 		return n;
 }
 
-// Assigns the pointers in n->next to the appropriate ones in path.
-// And updates the pointers in the preceding path nodes.
-void update_pointers(node* n)
+// Assigns a random height for a given node.
+void make_height(node* n)
 {
-	for(int h = 0; h < n->height; ++h ) {
-		n->next[h] = path[h]->next[h]; //initialize x's next pointers
-		path[h]->next[h] = n; // update next pointers that change
+	int i;
+	for( i=1; i<MAX_HEIGHT; ++i ) {
+		if( randBit() == 1 ) break;
 	}
+	n->height = i;
+}
+
+// creates a random number with proper distribution from 1 to MAX_HEIGHT
+int randBit(void) 
+{ 
+	static int bitsUpperBd=0;
+	static int bits; // store bits returned by rand()
+	if( bitsUpperBd == 0 ) { // refresh store when empty
+		bitsUpperBd = RAND_MAX;
+		bits = rand();
+	}
+	int b = bits & 1;
+	bits >>= 1;
+	bitsUpperBd >>= 1;
+	return b;
 }
 
 // find location of word alphabetically, if it exists: increase the count and add the page number.
@@ -143,25 +113,37 @@ void updateIndex(string wd, int page)
 
 }
 
-
-
-// prints the pages vector
-void printPages(vector<int> pages, ofstream& out)
+// Adds the given page number to the given word
+void update_word(word* w, int page)
 {
-	vector<int>::iterator it = pages.begin();
-	out << *it;
-	for (++it; it != pages.end(); ++it)
-	{
-		out << "," << *it;
-	}
-
+	(w->count)++;
+	pushPages(w, page);
 }
 
-void printWord(word* w, ofstream& out)
+// Adds given page number to back of page vector only if it isn't already there
+// Assumes: increasing order for page nums.
+void pushPages(word *w, int num)
 {
-	out << w->name << " (" << w->count << ") ";
-	printPages(*(w->pages), out);
-	out << endl; 
+	vector<int> *pages = w->pages;
+	if (pages->back() != num) {
+		pages->push_back(num);
+	}
+}
+
+// Assigns the pointers in n->next to the appropriate ones in path.
+// And updates the pointers in the preceding path nodes.
+void update_pointers(node* n)
+{
+	for(int h = 0; h < n->height; ++h ) {
+		n->next[h] = path[h]->next[h]; //initialize x's next pointers
+		path[h]->next[h] = n; // update next pointers that change
+	}
+}
+
+// prints index of words, counts and pages
+void printIndex(ofstream& out)
+{
+	printNodes(*(head->next), out);
 }
 
 // Prints all the nodes
@@ -173,12 +155,46 @@ void printNodes(node* n, ofstream& out)
 	}
 }
 
-// prints index of words, counts and pages
-void printIndex(ofstream& out)
+// Prints a word with its count and page numbers
+void printWord(word* w, ofstream& out)
 {
-	printNodes(*(head->next), out);
+	out << w->name << " (" << w->count << ") ";
+	printPages(*(w->pages), out);
+	out << endl; 
 }
 
+// prints the pages vector
+void printPages(vector<int> pages, ofstream& out)
+{
+	vector<int>::iterator it = pages.begin();
+	out << *it;
+	bool consecutive = false; // whether the pages we are evaluating are consecutive
+	int prev = *it;
+	it++;
+	while (it != pages.end()){
+		if (consecutive){ 
+			if (prev+1 == *it){ 
+				prev = *it;
+				it++;
+			}else {
+				out << "-" << prev; 
+				consecutive = false;
+			}
+		}else {
+			if (prev+1 == *it){ 
+				consecutive = true;
+				prev = *it;
+				it++;
+			}else {
+				out << "," << *it;
+				it++;
+			}
+		}
+	}
+	if (consecutive) {
+		out << "-" << prev;		
+	}
+}
 
 
 // Remove all characters except letters (A-Z,a-z) from line,

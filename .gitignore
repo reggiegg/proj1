@@ -11,3 +11,14 @@
 *.lai
 *.la
 *.a
+
+/Written2/
+
+*.doc
+*.txt
+
+proj1
+proj1b
+index
+
+SSH*

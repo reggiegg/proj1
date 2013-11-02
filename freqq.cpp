@@ -27,7 +27,7 @@ int FreqQ::hashFind(string word){
 	for (int i = 1; i < HASHTAB_SIZE/2; ++i){ //quadratic probing: after probing half repeats.
 		HashEntry entry = hashTab[h];
 		if (entry.heapIndex == EMPTY) return -1;
-		if (entry.name == word) return h;
+		if (entry.heapIndex != TOMBSTONE && entry.name == word) return h;
 		h = (h + 2*i -1) % HASHTAB_SIZE;
 	}
 	return -1;
@@ -66,13 +66,17 @@ int FreqQ::swapUp(int i){
 void FreqQ::swapDown(int i){
 	int left = (2 * i) + 1;
 	int right = left + 1;
+	int s = i;
 	if (left < heapSize && heap[left].freq > heap[i].freq){
-		swap(i, left);
-		swapDown(left);
+		s = left;
 	}
-	if (right < heapSize && heap[right].freq > heap[i].freq){
-		swap(i, right);
-		swapDown(right);
+	if (right < heapSize && heap[right].freq > heap[s].freq){
+		s = right;
+	}
+
+	if (s!=i){
+		swap(s, i);
+		swapDown(s);
 	}
 }
 
